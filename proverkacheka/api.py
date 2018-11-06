@@ -24,7 +24,7 @@ class API:
             'request_retries': 5,
             'request_retry_timeout': 0.5,
         }
-        self.params.update(**params)
+        self.params.update(**(params or {}))
 
     def get_ticket_json_text(self, query_str: str) -> str:
         query = self.__parse_query(query_str)
@@ -110,11 +110,13 @@ class API:
 
         return query
 
-    def is_valid_query_string(self, query_str: str):
+    def is_valid_query_string(self, query_str: str, silent=True):
         try:
             self.__parse_query(query_str)
         except exceptions.InvalidQueryStringException:
-            return False
+            if silent:
+                return False
+            raise
 
         return True
 
