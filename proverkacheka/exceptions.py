@@ -26,3 +26,12 @@ class TicketDataNotExistsException(ProverkachekaBaseException):
 
     def __str__(self):
         return f'Ticket\'s data does not exist ({self.url}).'
+
+
+class RequestTimeoutException(ProverkachekaBaseException):
+    def __init__(self, timeout: float or int, url: str):
+        self.url = url
+        self.timeout = timeout
+
+    def __str__(self):
+        return f'Request to {self.url} takes {self.timeout} sec.'

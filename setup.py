@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='proverkacheka',
-    version='0.1',
+    version='0.1.1',
     description='Api for proverkacheka.nalog.ru',
     url='https://github.com/oman36/proverkacheka',
     author='Petrov Vladimir',

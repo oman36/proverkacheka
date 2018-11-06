@@ -36,22 +36,27 @@ class API:
         }
         url = self.__build_url(uri)
 
-        response = False
+        response = None
         tries = 0
 
         while tries < self.params['request_retries']:
-            response = requests.get(
-                url,
-                params=params,
-                headers=self.headers,
-                auth=(self.username, self.password),
-                timeout=self.params['request_retry_timeout'],
-            )
-
-            if response.status_code != 202:
-                break
-
+            try:
+                response = requests.get(
+                    url,
+                    params=params,
+                    headers=self.headers,
+                    auth=(self.username, self.password),
+                    timeout=self.params['request_retry_timeout'],
+                )
+            except requests.ReadTimeout:
+                pass
+            else:
+                if response.status_code != 202:
+                    break
             tries += 1
+
+        if response is None:
+            raise exceptions.RequestTimeoutException(self.params['request_retry_timeout'] * tries, url)
 
         if response.status_code == 202:
             raise exceptions.TicketDataNotExistsException(
@@ -88,13 +93,16 @@ class API:
 
         for next_date in dates_list:
             params['date'] = next_date.strftime('%Y-%m-%dT%H:%M:00')
-            response = requests.get(
-                self.__build_url(uri),
-                params=params,
-                headers=self.headers,
-                auth=(self.username, self.password),
-                timeout=self.params['request_retry_timeout'],
-            )
+            try:
+                response = requests.get(
+                    self.__build_url(uri),
+                    params=params,
+                    headers=self.headers,
+                    auth=(self.username, self.password),
+                    timeout=self.params['request_retry_timeout'],
+                )
+            except requests.ReadTimeout:
+                return None
 
             if response.status_code == 204:
                 return True
